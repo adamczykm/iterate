@@ -11,6 +11,8 @@ The work hasnt yet been tested and may not work properly.
 
 * Original
 
+#+BEGIN_SRC common-lisp
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;                     ITERATE, An Iteration Macro
 ;;;
@@ -125,3 +127,6 @@ The work hasnt yet been tested and may not work properly.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; TO DOCUMENT:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#+END_SRC
+
