@@ -139,23 +139,23 @@
 
 ;;; These next two can be used for maximizing and minimizing.
 
-#+nil ;; unused
-(defconst smallest-number-alist
-  `((fixnum . ,most-negative-fixnum)
-    (float . ,most-negative-long-float)
-    (long-float . ,most-negative-long-float)
-    (short-float . ,most-negative-short-float)
-    (double-float . ,most-negative-double-float)
-    (single-float . ,most-negative-single-float)))
+;; #+nil ;; unused
+;; (defconst smallest-number-alist
+;;   `((fixnum . ,most-negative-fixnum)
+;;     (float . ,most-negative-long-float)
+;;     (long-float . ,most-negative-long-float)
+;;     (short-float . ,most-negative-short-float)
+;;     (double-float . ,most-negative-double-float)
+;;     (single-float . ,most-negative-single-float)))
 
-#+nil ;; unused
-(defconst largest-number-alist
-  `((fixnum . ,most-positive-fixnum)
-    (float . ,most-positive-long-float)
-    (long-float . ,most-positive-long-float)
-    (short-float . ,most-positive-short-float)
-    (double-float . ,most-positive-double-float)
-    (single-float . ,most-positive-single-float)))
+;; #+nil ;; unused
+;; (defconst largest-number-alist
+;;   `((fixnum . ,most-positive-fixnum)
+;;     (float . ,most-positive-long-float)
+;;     (long-float . ,most-positive-long-float)
+;;     (short-float . ,most-positive-short-float)
+;;     (double-float . ,most-positive-double-float)
+;;     (single-float . ,most-positive-single-float)))
 
 
 ;;; This is like (declare (declare-variables)).
@@ -306,10 +306,10 @@
     ;; Furthermore, Lispworks macroexpands m-v-b into some unknown m-v-BIND-call special form.
     (multiple-value-bind .  walk-multiple-value-bind)
     ;; Allegro treats cond as a special form, it does not macroexpand.
-    #+allegro (cond .	    walk-cond)
+    ;; #+allegro (cond .	    walk-cond)
     ;; Prior to 2005, CLISP expanded handler-bind into some
     ;; sys::%handler-bind syntax not declared as a special operator.
-    #+clisp (handler-bind . walk-cddr) ; does not recognize clauses in handlers
+    ;; #+clisp (handler-bind . walk-cddr) ; does not recognize clauses in handlers
     ;; A suitable generalization would be a pattern language that describes
     ;; which car/cdr are forms to be walked, declarations or structure.
     ;; Walk with-*-iterator ourselves in order to avoid macrolet warnings.
@@ -427,9 +427,9 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)  ;; Allegro needs this 
 
-#+nil ;; unused
-(defmacro assertion (test)
-  `(if (not ,test) (bug "Assertion ~a failed" ',test)))
+;; #+nil ;; unused
+;; (defmacro assertion (test)
+;;   `(if (not ,test) (bug "Assertion ~a failed" ',test)))
 
 (defmacro augment (var stuff)
   `(setf ,var (nconc ,var ,stuff)))
@@ -528,14 +528,14 @@
 
   ) ; end eval-when
 
-#|
-;; Optionally set up Slime so that C-c C-c works with #L
-#+#.(cl:when (cl:find-package "SWANK") '(:and))
-(unless (assoc "ITERATE" swank:*readtable-alist* :test #'string=)
-  (bind ((*readtable* (copy-readtable *readtable*)))
-    (enable-sharpL-reader)
-    (push (cons "ITERATE" *readtable*) swank:*readtable-alist*)))
-;|#
+
+;; ;; Optionally set up Slime so that C-c C-c works with #L
+;; #+#.(cl:when (cl:find-package "SWANK") '(:and))
+;; (unless (assoc "ITERATE" swank:*readtable-alist* :test #'string=)
+;;   (bind ((*readtable* (copy-readtable *readtable*)))
+;;     (enable-sharpL-reader)
+;;     (push (cons "ITERATE" *readtable*) swank:*readtable-alist*)))
+;; ;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; The ITERATE macro.
@@ -612,7 +612,7 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
   "Create iterators which may also be used as generators"
   (define-clause 'defmacro clause-template body t))
 
-;;;;;;;;;;;;;;;;
+;; ;;;;;;;;;;;;;;;;
 
 (defun process-top-level-decls (clauses)
   ;; This sets *type-alist* to an alist of (var . type), and
@@ -717,7 +717,7 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
        (process-clause form))     
       (t ;; Lisp function call 
        (return-code-modifying-body #'walk-arglist (cdr form)
-				   #L(list (cons (car form) !1))))))
+                                   (lambda (x) (list (cons (car form) x)))))))
    ((lambda-expression? (car form))
     ;; Function call with a lambda in the car
     (multiple-value-bind (bod decs init step final final-prot)
@@ -727,10 +727,10 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
 	(values (list (cons bod abod)) (nconc decs adecs) (nconc init ainit)
 		(nconc step astep) (nconc final afinal) 
 		(nconc final-prot afinal-prot)))))
-   #+clisp ; some macros expand into ((setf foo) value other-args...)
-   ;; reported by Marco Baringer on 24 Jan 2005
-   ((typep form '(cons (cons (eql setf) *) *))
-    (apply #'walk-cdr form))
+   ;; #+clisp ; some macros expand into ((setf foo) value other-args...)
+   ;; ;; reported by Marco Baringer on 24 Jan 2005
+   ;; ((typep form '(cons (cons (eql setf) *) *))
+   ;;  (apply #'walk-cdr form))
    (t
     (clause-error "The form ~a is not a valid Lisp expression" form))))
 
@@ -739,9 +739,9 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
 
 (defun walk-arglist (args)
   (let ((*top-level?* nil))
-    (walk-list-nconcing args #'walk  #L(if (is-iterate-clause? !1)
-					   (list (prognify !2))
-					   !2))))
+    (walk-list-nconcing args #'walk (lambda (x y) (if (is-iterate-clause? x)
+                                                 (list (prognify y))
+                                                 y)))))
 
 (defun walk-fspec (form)
   ;; Works for lambdas and function specs in flet and labels.
@@ -749,17 +749,16 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
   ;; We only walk at the body.  The args are set up as internal variables.
   ;; Declarations are kept internal to the body.
   (let* ((args (second form))
-	 (body (cddr form))
-	 (*top-level?* nil)
-	 (*binding-context?* t)
-	 (*internal-variables* (add-internal-vars args)))
+         (body (cddr form))
+         (*top-level?* nil)
+         (*binding-context?* t)
+         (*internal-variables* (add-internal-vars args)))
     (multiple-value-bind (bod decs init step final finalp)
-	(walk-list body)
-      (values `(,(first form) ,args ,.decs ,.bod) nil init step final 
-	      finalp))))
+        (walk-list body)
+      (values `(,(first form) ,args ,.decs ,.bod) nil init step final
+              finalp))))
 
-(defun walk-list-nconcing (list walk-fn 
-				&optional (body-during #L!2))
+(defun walk-list-nconcing (list walk-fn &optional (body-during (lambda (x y) y)))
   (let (body-code decls init-code step-code final-code finalp-code)
     (dolist (form list)
       (declare (optimize (speed 0)))
@@ -819,18 +818,18 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
 	(list form)
 	(apply func form))))
 
-#+nil
-(defun walk-identity (&rest stuff)
-  (list stuff))
+;; #+nil
+;; (defun walk-identity (&rest stuff)
+;;   (list stuff))
 
 (defun walk-cdr (first &rest stuff)
   ;; This is for anything where only the car isn't to be walked.
-  (return-code-modifying-body #'walk-arglist stuff #L(list (cons first !1))))
+  (return-code-modifying-body #'walk-arglist stuff (lambda (x) (list (cons first x)))))
 
 (defun walk-cddr (first second &rest stuff)
   ;; This is for anything where the first two elements aren't to be walked.
   (return-code-modifying-body #'walk-arglist stuff
-			      #L(list (cons first (cons second !1)))))
+                              (lambda (x) (list (cons first (cons second x))))))
 
 (defun walk-progn (progn &rest stuff)
   ;; The only difference between this and walk-cdr is that *top-level* is not
@@ -838,9 +837,9 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
   ;; the definition of "top-level" in lisp. 
   ;; (Also, just for looks, this returns nil if the progn is empty.)
   (return-code-modifying-body #'walk-list stuff 
-			      #L(if (null !1)
-				    nil
-				    (list (cons progn !1)))))
+                              (lambda (x) (if (null x)
+                                     nil
+                                     (list (cons progn x))))))
 
 (defun walk-setq (setq &rest things)
   ;; Walk every other thing.
@@ -864,8 +863,8 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
 
 (defun walk-function (function form)
   (if (lambda-expression? form)
-      (return-code-modifying-body #'walk-fspec form #L(list 
-						       (list function !1)))
+      (return-code-modifying-body #'walk-fspec form (lambda (x) (list
+                                                            (list function x))))
       (list (list function form))))
 
 (defun walk-declare (&rest declaration)
@@ -873,7 +872,7 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
   ;; section of the loop.  Declarations are only allowed at top-level,
   ;; except that they are allowed within binding environments, in which case
   ;; they apply only to that binding environment.
-  #+ symbolics (setq declaration (copy-list declaration))
+  ;; #+ symbolics (setq declaration (copy-list declaration))
   (if (or *top-level?* *binding-context?*)
       (return-code :declarations (list declaration)) 
       (clause-error "Declarations must occur at top-level, or inside a ~
@@ -902,7 +901,7 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
 
 (defun walk-let-bindings (let bindings)
   (if (eq let 'let)
-      (walk-list-nconcing bindings #'walk-let-binding #L(list !2))
+      (walk-list-nconcing bindings #'walk-let-binding (lambda (x y) (list y)))
       (walk-let*-bindings bindings)))
 
 
@@ -953,7 +952,7 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
   ;; For FLET or LABELS.  We don't worry about the function bindings.
   (let ((*top-level?* nil))
     (multiple-value-bind (binds b-decls b-init b-step b-final b-finalp)
-	(walk-list-nconcing bindings #'walk-fspec #L(list !2))
+        (walk-list-nconcing bindings #'walk-fspec (lambda (x y) (list x)))
       (let ((*binding-context?* t))
         (multiple-value-bind (bod decls init step final finalp)
 	    (walk-list body)
@@ -971,24 +970,24 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
   ;; *declaration-context?* true keep them local (that is, in walk-let,
   ;; walk-flet and walk-multiple-value-bind b-decls/edecls are always NIL).
   ;; Ignoring code-movement issues, this approach should be fine.
-  (let* ((forms (member 'declare stuff :key #L(if (consp !1) (car !1))
+  (let* ((forms (member 'declare stuff :key (lambda (x)(if (consp x) (car x)))
 			:test-not #'eq))
 	 (decls (ldiff stuff forms)))
     (return-code-modifying-body #'walk-arglist forms
-				#L(list (cons first (nconc decls !1))))))
+                                (lambda (x)(list (cons first (nconc decls x)))))))
 
 (defun walk-cddr-with-declarations (first second &rest stuff)
-  (let* ((forms (member 'declare stuff :key #L(if (consp !1) (car !1))
+  (let* ((forms (member 'declare stuff :key (lambda (x) (if (consp x) (car x)))
 			:test-not #'eq))
 	 (decls (ldiff stuff forms)))
     (return-code-modifying-body #'walk-arglist forms
-				#L(list (cons first (cons second (nconc decls !1)))))))
+                                (lambda (x) (list (cons first (cons second (nconc decls x))))))))
 
 (defun walk-tagbody (tagbody &rest statements)
   (flet ((walk-statements (statements)
 	   (walk-list-nconcing
 	    statements
-	    #L(if (atom !1) (list !1) (walk !1))
+	    (lambda (x) (lambda (x) (if (atom x) (list x) (walk x))))
 	    #'(lambda (form body)
 		(cond ((atom form) body)
 		      ;; wrap statements which expand into an atom
@@ -998,7 +997,7 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
     (let ((*top-level?* nil))
       (return-code-modifying-body
        #'walk-statements statements
-       #L(list (cons tagbody !1))))))
+       (lambda (x) (list (cons tagbody x)))))))
 
 (defun walk-macrolet (form-name &rest stuff)
   (declare (ignore stuff))
@@ -1006,24 +1005,24 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
   refactor the Iterate form (e.g. by using ~As that wrap ~
   the ITERATE form)." form-name form-name))
 
-#+allegro
-(defun walk-cond (cond &rest stuff)
-  ;; Because the allegro compiler insists on treating COND as a special form,
-  ;; and because some version macroexpands (cond #) into (cond #)!
-  (declare (ignore cond))
-  (if (null stuff)
-      nil
-      (let* ((first-clause (first stuff))
-	     (test (if (not (consp first-clause))
-		       (error "cond clause ~a is not a list" first-clause)
-		       (car first-clause)))
-	     (thens (cdr first-clause))
-	     (if-form (if (null thens)
-			  (let ((var (gensym)))
-			    `(let ((,var ,test))
-			      (if ,var ,var (cond ,@(cdr stuff)))))
-			  `(if ,test (progn ,@thens) (cond ,@(cdr stuff))))))
-	(walk if-form))))
+;; #+allegro
+;; (defun walk-cond (cond &rest stuff)
+;;   ;; Because the allegro compiler insists on treating COND as a special form,
+;;   ;; and because some version macroexpands (cond #) into (cond #)!
+;;   (declare (ignore cond))
+;;   (if (null stuff)
+;;       nil
+;;       (let* ((first-clause (first stuff))
+;; 	     (test (if (not (consp first-clause))
+;; 		       (error "cond clause ~a is not a list" first-clause)
+;; 		       (car first-clause)))
+;; 	     (thens (cdr first-clause))
+;; 	     (if-form (if (null thens)
+;; 			  (let ((var (gensym)))
+;; 			    `(let ((,var ,test))
+;; 			      (if ,var ,var (cond ,@(cdr stuff)))))
+;; 			  `(if ,test (progn ,@thens) (cond ,@(cdr stuff))))))
+;; 	(walk if-form))))
 			    
 
 
@@ -1368,7 +1367,7 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
   ;; keywordized) should be equal to some clause in the index.
  (let* ((all-keywords
 	 (cons (first clause-keywords)
-	       (mapcar #L(if (eq !1 '&optional) !1 (keywordize !1))
+	       (mapcar (lambda (x) (if (eq x '&optional) x (keywordize x)))
 		       (rest clause-keywords))))
 	(req-keywords
 	 (ldiff all-keywords (member '&optional all-keywords :test #'eq))))
@@ -1598,25 +1597,25 @@ Evaluate (iterate:display-iterate-clauses) for an overview of clauses"
 	(vars (listify var)))
     `(let ((,old-var *temps-in-use*))
        (unwind-protect
-	   (let ,(mapcar #L`(,!1 (get-free-temp))
+            (let ,(mapcar (lambda (x) `(,x (get-free-temp)))
 			 vars)
 	     .,body)
 	 (setq *temps-in-use* ,old-var)))))
 
-#+nil ;; unused
-(defmacro with-temporaries (n vlist &body body)
-  (let ((old-var (gensym)))
-    `(let ((,old-var *temps-in-use*))
-       (unwind-protect
-	   (let ((,vlist (let ((ts nil)) 
-			   (dotimes (i ,n) 
-			     (push (get-free-temp) ts))
-			   ts)))
-	      .,body)
-	 (setq *temps-in-use* ,old-var)))))
+;; #+nil ;; unused
+;; (defmacro with-temporaries (n vlist &body body)
+;;   (let ((old-var (gensym)))
+;;     `(let ((,old-var *temps-in-use*))
+;;        (unwind-protect
+;; 	   (let ((,vlist (let ((ts nil)) 
+;; 			   (dotimes (i ,n) 
+;; 			     (push (get-free-temp) ts))
+;; 			   ts)))
+;; 	      .,body)
+;; 	 (setq *temps-in-use* ,old-var)))))
 
 (defun get-free-temp ()
-  (let ((temp (some #L(if (not (member !1 *temps-in-use*)) !1)
+  (let ((temp (some (lambda (x) (if (not (member x *temps-in-use*)) x))
 		    *temps*)))
     (when (null temp)
       (setq temp (make-var-and-default-binding 'temp))
@@ -2046,7 +2045,7 @@ e.g. (DSETQ (VALUES (a . b) nil c) form)"
 	  `(let ,temp-vars
 	     (declare (ignorable .,temp-vars)) ; in case of NIL template
 	     ,mv-setq
-	     ,.(mapcan #L(make-dsetqs !1 !2 bindings?)
+	     ,.(mapcan (lambda (x y) (make-dsetqs x y bindings?))
 		       tplates temps)
 	     ,(car vars))))))
 
@@ -2107,17 +2106,17 @@ e.g. (DSETQ (VALUES (a . b) nil c) form)"
 	(function
 	    (free-vars-fspec (second form) bound-vars))
 	((flet labels macrolet)
-	    (nconc (mapcan #L(free-vars-fspec !1 bound-vars)
+   (nconc (mapcan (lambda (x) (free-vars-fspec x bound-vars))
 			   (second form))
 		   (free-vars-list (cddr form) bound-vars)))
 	((let symbol-macrolet)
 	    (let* ((bindings (second form))
 		   (body (cddr form))
-		   (vars (mapcar #L(if (consp !1) (car !1) !1)
+             (vars (mapcar (lambda (x) (if (consp x) (car x) x))
 				 bindings)))
-	      (nconc (mapcan #L(if (consp !1)
-				   (free-vars (second !1) bound-vars)
-				   nil)
+	      (nconc (mapcan (lambda (x) (if (consp x)
+                                  (free-vars (second x) bound-vars)
+                                  nil))
 			     bindings)
 		     (free-vars-list body (append vars bound-vars)))))
 	(let*
@@ -2143,7 +2142,7 @@ e.g. (DSETQ (VALUES (a . b) nil c) form)"
     (error "The form ~a is not a valid Lisp expression" form))))
 
 (defun free-vars-list (list bound-vars)
-  (mapcan #L(free-vars !1 bound-vars)
+  (mapcan (lambda (x) (free-vars x bound-vars))
 	  list))
 
 (defun free-vars-fspec (fspec bound-vars)
@@ -2285,7 +2284,7 @@ e.g. (DSETQ (VALUES (a . b) nil c) form)"
 (defun make-funcall (fn &rest args)
   ;; This should be used when FN is something the user has written in a
   ;; clause. 
-  #+symbolics (setq args (copy-list args))
+  ;; #+symbolics (setq args (copy-list args))
   (cond
    ((or (quoted? fn) (function-quoted? fn))
     `(,(second fn) ,@args))
@@ -2297,7 +2296,7 @@ e.g. (DSETQ (VALUES (a . b) nil c) form)"
 
 (defun make-application (fn &rest args)
   ;; Use this when FN is given in the implementation code.
-  #+ symbolics (setq args (copy-list args))
+  ;; #+ symbolics (setq args (copy-list args))
   (cond
    ((or (symbolp fn) (lambda-expression? fn))
     `(,fn ,@args))
@@ -3301,11 +3300,11 @@ e.g. (DSETQ (VALUES (a . b) nil c) form)"
     :variable var
     :expression expr
     :start-operation `(subst (expr var)
-			(nconc (delete-if #L(member !1 var :test ,test)
+                             (nconc (delete-if (lambda (x) (member x var :test ,test))
 					  (copy-list expr))
 			       var))
     :end-operation `(subst (var expr) 
-		      (delete-if #L(member !1 var :test ,test)
+                           (delete-if (lambda (x) (member x var :test ,test))
 				 (copy-list expr)))
     :place place
     :one-element nil))
@@ -3319,11 +3318,11 @@ e.g. (DSETQ (VALUES (a . b) nil c) form)"
     :variable var
     :expression expr
     :start-operation `(subst (expr var)
-			(nconc (delete-if #L(member !1 var :test ,test)
+                             (nconc (delete-if (lambda (x) (member x var :test ,test))
 					  expr)
 			       var))
     :end-operation `(subst (var expr) 
-		      (delete-if #L(member !1 var :test ,test)
+                           (delete-if (lambda (x) (member x var :test ,test))
 				 expr))
     :place place
     :one-element nil))
@@ -3381,7 +3380,7 @@ e.g. (DSETQ (VALUES (a . b) nil c) form)"
 			  'temp :using-type-of init-val)))
 	       (iv-ref (or temp init-val))
 	       (save-vars (cons pvar (make-save-vars var (1- n))))
-	       (inits (mapcar #L`(setq ,!1 ,iv-ref) save-vars)))
+	       (inits (mapcar (lambda (x) `(setq ,x ,iv-ref)) save-vars)))
 	  (if temp (push `(setq ,temp ,init-val) inits))
 	  (make-default-binding pvar-spec)
 	  (push (make-save-info :save-var pvar
@@ -3466,7 +3465,7 @@ e.g. (DSETQ (VALUES (a . b) nil c) form)"
 	   (if (and (null code-list) (not (eq class :step)))
 	       (clause-error "Cannot obtain previous values of ~a" var)
 	       (let ((prev-code (if (not (eq class :next))
-				    (mapcan #L(make-prev-code var !1)
+                              (mapcan (lambda (x) (make-prev-code var x))
 					    save-info-list))))
 		 (case class
 ;;;;;;		   (:step (augment step-code prev-code))
