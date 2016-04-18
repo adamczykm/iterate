@@ -1,0 +1,127 @@
+* Adjustments
+
+The package was adjusted to mocl compiler by:
+
+- removing implementation specific compiler annotations (e.g. #+allegro (...))
+- removing reader macros.
+
+* Status
+
+The work hasnt yet been tested and may not work properly.
+
+* Original
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;                     ITERATE, An Iteration Macro
+;;;
+;;;                 Copyright 1989 by Jonathan Amsterdam
+;;;         Adapted to ANSI Common Lisp in 2003 by Andreas Fuchs
+;;;
+;;; Permission to use, copy, modify, and distribute this software and its
+;;; documentation for any purpose and without fee is hereby granted,
+;;; provided that this copyright and permission notice appear in all
+;;; copies and supporting documentation, and that the name of M.I.T. not
+;;; be used in advertising or publicity pertaining to distribution of the
+;;; software without specific, written prior permission. M.I.T. makes no
+;;; representations about the suitability of this software for any
+;;; purpose.  It is provided "as is" without express or implied warranty.
+
+;;; M.I.T. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+;;; ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+;;; M.I.T. BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
+;;; ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+;;; WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+;;; ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+;;; SOFTWARE.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;  FIXES.
+;;; (v. 1.2-ansi)
+;;;  2004-11-30 - Joerg Hoehle: a dozen small fixes to various functions
+;;;  2003-12-16 - Tested a bit more, implemented FOR-HASHTABLE and
+;;;               FOR-PACKAGES (FOR-PACKAGE) iteration CLtS-style
+;;;               using (with-{package,hashtable}-iterator)
+;;;  2003-12-16 - ported iterate-1.2 to ANSI Common Lisp (in the form
+;;;               of SBCL). Extremely untested. Works for simple
+;;;               examples, though.
+;;; (v. 1.2)
+;;;  6/14/91  - fixed generation of previous code
+;;;  5/6/91   - improved code generated for COLLECT and ADJOINING
+;;;  4/10/91  - added *binding-context?* to correctly determine when inside
+;;;	        a binding context
+;;;  12/20/90 - fixed ,. bug in IN-HASHTABLE
+;;;  3/3/91 - no longer generates loop-end and loop-step tags if they're not
+;;;           used, to avoid compiler warnings from some compilers (Allegro)
+;;;  3/4/91 - treat cond as a special form for allegro
+;;;  (v. 1.1.1)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; OUTSTANDING PROBLEMS & QUESTIONS:
+;;; - What happens if there are two contradictory declarations 
+;;;   about a variable's type?  We just take the second one. CLM 
+;;;   doesn't say, but presumably this is an error. Let's say it is.
+;;;
+;;; - Is there a more general way to do synonyms that still allows
+;;;   some specificity to particular clauses?  Right now, all we allow
+;;;   is for the first words of clauses to have synonyms.
+;;;
+;;; - We should look at function type declarations, at least at the
+;;;   result type, and record them.
+;;;
+;;; - Consider adding an if-never keyword to find...max/min
+;;;
+;;; - Consider allowing accumulation variables to be generalized
+;;;   variables, acceptable to setf.
+;;;
+;;; - Consider parsing type declarations of the form (vector * integer),
+;;;   to generate types for internal variables.
+;;;
+;;; - Vector destructuring?
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; TO DO: 
+;;;  - do I walk &optional and &key code in lambda-lists?
+;;;  - try binding *macroexpand-hook* in walk
+;;;  - track down PREVIOUS bug in Symbolics and sparc lucid
+
+;;;  - reducing and accum: RESULT-TYPE
+;;;  - rethink types 
+;;;  - how to type result var?
+;;;  - (for var concatenate (from 1 to 10) (in '(a b c)) (next (gensym)))
+;;;  -       (if (< var 10) 
+;;;		 (next [from-to])
+;;;		 (if lst
+;;;		     (next [in])
+;;;		     (gensym)))
+;;;  - for var choose, for var repeatedly
+
+;;; For CL version 2:
+;;;  - variable info from environments
+;;;  - macro info     "     " (so we can support macrolet)
+;;;  - use errors for EOF
+;;;  - change WALK and FREE-VARIABLES to take symbol macros into account
+;;;  - array indices are fixnums
+;;;  - type REAL for extremum clauses
+
+;;; Maybe:
+;;;  - decls can appear not at top level, as long as they appear before use.
+;;;  - extremum and find-extremum should do reductions when possible
+;;;  - optimize collections, hashtables, packages for lispms 
+;;;  - fix :using-type-of to check for supplied ???
+;;;  - for-in should allow numerical keywords (from, to, etc.)...?
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; TO TEST: 
+;;;  - leaving driver code where it is
+;;;  - typing
+;;;  - macroexpand & walk after-each
+;;;  - check for duplicate keywords in defclause, defmacro-clause
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; TO DOCUMENT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
